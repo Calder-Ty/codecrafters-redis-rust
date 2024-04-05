@@ -1,6 +1,6 @@
 use std::io::{Read, Write};
 // Uncomment this block to pass the first stage
-use std::net::{TcpListener, TcpStream};
+use std::net::TcpListener;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -12,22 +12,19 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(mut _stream) => {
-                handle_client(_stream);
-            }
+            Ok(mut _stream) => loop {
+                let mut input = [0; 512];
+                let read_count = _stream
+                    .read(input.as_mut_slice())
+                    .expect("Could Not Read from Stream");
+                if read_count == 0 {
+                    break;
+                }
+                let _ = _stream.write_all(b"+PONG\r\n");
+            },
             Err(e) => {
                 println!("error: {}", e);
             }
         }
     }
 }
-
-
-fn handle_client(mut stream: TcpStream) {
-    let mut input = [0; 512];
-    let _ = stream.read(input.as_mut_slice());
-    for _ in input.split(|c| *c == b'\n') {
-        let _ = stream.write_all(b"+PONG\r\n");
-    }
-}
-
