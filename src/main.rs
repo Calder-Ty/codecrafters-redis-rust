@@ -33,7 +33,7 @@ fn handle_client(mut stream: TcpStream) {
     for cmd in parse_client_input(&input) {
         match cmd {
             RedisCommand::Ping => {
-                let _ = stream.write_all(b"+PONG\n\r");
+                let _ = stream.write_all(b"+PONG\r\n");
             },
         };
     }
