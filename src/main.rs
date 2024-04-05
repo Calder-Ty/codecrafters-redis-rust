@@ -23,32 +23,12 @@ fn main() {
     }
 }
 
-enum RedisCommand {
-    Ping,
-}
 
 fn handle_client(mut stream: TcpStream) {
     let mut input = [0; 512];
     let _ = stream.read(input.as_mut_slice());
-    for cmd in parse_client_input(&input) {
-        match cmd {
-            RedisCommand::Ping => {
-                let _ = stream.write_all(b"+PONG\r\n");
-            },
-        };
+    for _ in input.split(|c| *c == b'\n') {
+        let _ = stream.write_all(b"+PONG\r\n");
     }
 }
 
-fn parse_client_input(input: &[u8]) -> impl Iterator<Item = RedisCommand> {
-    let mut outs = vec![];
-    let mut cmd_buff = vec![];
-    for byte in input {
-        if *byte == b'\n' {
-            let cmd = RedisCommand::Ping;
-            outs.push(cmd);
-            cmd_buff.clear();
-        };
-        cmd_buff.push(byte);
-    }
-    outs.into_iter()
-}
